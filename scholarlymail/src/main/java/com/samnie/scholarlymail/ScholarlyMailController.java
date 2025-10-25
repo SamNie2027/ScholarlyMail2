@@ -92,9 +92,10 @@ public class ScholarlyMailController {
         if (existingArticleOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         } else {
-            Article existingArticle = existingArticleOpt.get()
+            Article existingArticle = existingArticleOpt.get();
             existingArticleOpt.get().setRead((Boolean) !existingArticleOpt.get().getRead());
             Article updatedArticle = articleRepo.save(existingArticle);
             return ResponseEntity.ok(updatedArticle);
         }
+    }
 }
