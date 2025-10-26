@@ -1,0 +1,21 @@
+name: scholarlymail
+
+services:
+  mongodb:
+    image: mongo
+    ports:
+      - "8081:27017"
+    networks:
+      - scholarlymail
+
+  web:
+    build: .
+    ports:
+     - "8081:27017"
+    image: scholarlymail
+    networks:
+      - scholarlymail
+
+networks:
+  # The presence of these objects is sufficient to define them
+  scholarlymail: {}
