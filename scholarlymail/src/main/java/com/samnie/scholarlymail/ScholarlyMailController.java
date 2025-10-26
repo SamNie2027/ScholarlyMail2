@@ -12,11 +12,9 @@ import java.util.Optional;
 @RestController
 public class ScholarlyMailController {
     private final ScholarlyMailService service;
-    private final ArticleRepository articleRepo;
 
-    public ScholarlyMailController(ScholarlyMailService service, ArticleRepository articleRepo) {
+    public ScholarlyMailController(ScholarlyMailService service) {
         this.service = service;
-        this.articleRepo = articleRepo;
     }
 
     @GetMapping("/")
@@ -24,83 +22,44 @@ public class ScholarlyMailController {
         return "ScholarlyMail API is running!";
     }
 
-    // findAll method is predefined method in Mongo Repository
-    // with this method we will all user that is saved in our database
     @GetMapping("/articles")
-    public List<Article> getAllArticles() {
-        return articleRepo.findAll();
+    public ResponseEntity<List<Article>> getAllArticles() {
+        return ResponseEntity.ok(service.getAllArticles());
     }
 
     @GetMapping("/articles/{id}")
     public ResponseEntity<Article> getArticles(@PathVariable String id) {
-        Optional<Article> article = articleRepo.findById(id);
-        if (article.isPresent()) {
-            return ResponseEntity.ok(article.get());
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return service.getArticles(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping("/articles")
     public ResponseEntity<Article> postArticles(@RequestBody Article article) {
-        Article savedArticle = articleRepo.save(article);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedArticle);
+        Article saved = service.postArticles(article);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @PatchMapping("/articles/{id}")
-    public ResponseEntity<Article> patchArticles(@PathVariable String id, @RequestBody Map<String, Object> updates) {
-        Optional<Article> existingArticleOpt = articleRepo.findById(id);
-
-        if (existingArticleOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        Article existingArticle = existingArticleOpt.get();
-
-        // Apply partial updates (you can customize this logic)
-        if (updates.containsKey("title")) {
-            existingArticle.setTitle((String) updates.get("title"));
-        }
-        if (updates.containsKey("authors")) {
-            existingArticle.setAuthors((List<String>) updates.get("authors"));
-        }
-        if (updates.containsKey("url")) {
-            existingArticle.setUrl((String) updates.get("url"));
-        }
-        if (updates.containsKey("tags")) {
-            existingArticle.setTags((List<String>) updates.get("tags"));
-        }
-        if (updates.containsKey("notes")) {
-            existingArticle.setNotes((String) updates.get("notes"));
-        }
-        if (updates.containsKey("read")) {
-            existingArticle.setRead((Boolean) updates.get("read"));
-        }
-
-        Article updatedArticle = articleRepo.save(existingArticle);
-        return ResponseEntity.ok(updatedArticle);
+    public ResponseEntity<Article> patchArticles(
+            @PathVariable String id,
+            @RequestBody Map<String, Object> updates) {
+        return service.patchArticles(id, updates)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/articles/{id}")
     public ResponseEntity<Void> deleteArticles(@PathVariable String id) {
-        if (!articleRepo.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-
-        articleRepo.deleteById(id);
-        return ResponseEntity.noContent().build(); // 204 No Content
+        return service.deleteArticles(id)
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.notFound().build();
     }
 
     @PatchMapping("/articles/{id}/read")
     public ResponseEntity<Article> updateArticles(@PathVariable String id) {
-        Optional<Article> existingArticleOpt = articleRepo.findById(id);
-        if (existingArticleOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        } else {
-            Article existingArticle = existingArticleOpt.get();
-            existingArticleOpt.get().setRead((Boolean) !existingArticleOpt.get().getRead());
-            Article updatedArticle = articleRepo.save(existingArticle);
-            return ResponseEntity.ok(updatedArticle);
-        }
+        return service.updateArticles(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }
