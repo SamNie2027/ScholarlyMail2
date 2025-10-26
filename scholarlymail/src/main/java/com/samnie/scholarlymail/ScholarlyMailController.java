@@ -19,6 +19,11 @@ public class ScholarlyMailController {
         this.articleRepo = articleRepo;
     }
 
+    @GetMapping("/")
+    public String home() {
+        return "ScholarlyMail API is running!";
+    }
+
     // findAll method is predefined method in Mongo Repository
     // with this method we will all user that is saved in our database
     @GetMapping("/articles")
