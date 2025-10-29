@@ -1,26 +1,20 @@
 name: scholarlymail
 
-secrets:
-  db_root_username:
-    environment: "MONGO_INITDB_ROOT_USERNAME"
-  db_root_password:
-    environment: "MONGO_INITDB_ROOT_USERNAME"
-
+#mongodb://${DB_ROOT_USERNAME}:${DB_ROOT_PASSWORD}@mongodb:27017/
 services:
   mongodb:
     image: mongo:4.4.18
+    # Note: in prod this should be removed as it exposes mongo outside of the docker network
     ports:
       - "27017:27017"
     networks:
       - scholarlymail
     environment:
-      MONGO_INITDB_ROOT_USERNAME: db_root_username
-      MONGO_INITDB_ROOT_PASSWORD: db_root_password
+      MONGO_INITDB_ROOT_USERNAME: ${DB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     volumes:
       - mongodb_data:/data/db
-    secrets:
-      - db_root_username
-      - db_root_password
+
 
 #  web:
 #    build: .
