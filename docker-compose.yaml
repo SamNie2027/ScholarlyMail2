@@ -8,11 +8,11 @@ services:
       - "27017:27017"
     networks:
       - scholarlymail
-#    environment:
-#      MONGO_INITDB_ROOT_USERNAME: ${DB_ROOT_USERNAME}
-#      MONGO_INITDB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-#    volumes:
-#      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${DB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - mongodb_data:/data/db
 
   web:
     build: .
@@ -22,9 +22,9 @@ services:
     networks:
       - scholarlymail
 
-#volumes:
-#  mongodb_data:
-#    driver: local
+volumes:
+  mongodb_data:
+    driver: local
 
 
 networks:
