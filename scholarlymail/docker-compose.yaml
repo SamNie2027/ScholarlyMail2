@@ -1,5 +1,11 @@
 name: scholarlymail
 
+secrets:
+  db_root_username:
+    environment: "MONGO_INITDB_ROOT_USERNAME"
+  db_root_password:
+    environment: "MONGO_INITDB_ROOT_USERNAME"
+
 services:
   mongodb:
     image: mongo:4.4.18
@@ -7,14 +13,27 @@ services:
       - "27017:27017"
     networks:
       - scholarlymail
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: db_root_username
+      MONGO_INITDB_ROOT_PASSWORD: db_root_password
+    volumes:
+      - mongodb_data:/data/db
+    secrets:
+      - db_root_username
+      - db_root_password
 
-  web:
-    build: .
-    ports:
-     - "8081:8081"
-    image: scholarlymail
-    networks:
-      - scholarlymail
+#  web:
+#    build: .
+#    ports:
+#     - "8081:8081"
+#    image: scholarlymail
+#    networks:
+#      - scholarlymail
+
+volumes:
+  mongodb_data:
+    driver: local
+
 
 networks:
   # The presence of these objects is sufficient to define them
