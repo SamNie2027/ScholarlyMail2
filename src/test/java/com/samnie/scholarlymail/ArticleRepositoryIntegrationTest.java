@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ArticleRepositoryIntegrationTest {
 
     @Container
-    static MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:7.0.5");
+    static MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:4.4.18");
 
     @BeforeAll
     static void setup() {
