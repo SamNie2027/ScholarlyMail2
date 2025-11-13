@@ -7,9 +7,10 @@ services:
       - "27017:27017"
     networks:
       - scholarlymail
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${DB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    command: [ "--noauth" ]
+    #    environment:
+#      MONGO_INITDB_ROOT_USERNAME: ${DB_ROOT_USERNAME}
+#      MONGO_INITDB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     volumes:
       - mongodb_data:/data/db
     healthcheck:
