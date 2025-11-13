@@ -7,10 +7,9 @@ services:
       - "27017:27017"
     networks:
       - scholarlymail
-    command: [ "--noauth" ]
-    #    environment:
-#      MONGO_INITDB_ROOT_USERNAME: ${DB_ROOT_USERNAME}
-#      MONGO_INITDB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${DB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     volumes:
       - mongodb_data:/data/db
     healthcheck:
@@ -26,6 +25,8 @@ services:
     image: scholarlymail
     networks:
       - scholarlymail
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://${DB_ROOT_USERNAME}:${DB_ROOT_PASSWORD}@mongodb:27017/local?authSource=admin
     depends_on:
       mongodb:
         condition: service_healthy
