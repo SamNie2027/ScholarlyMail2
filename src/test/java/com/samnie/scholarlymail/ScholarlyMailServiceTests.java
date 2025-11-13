@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 @Testcontainers
 @ActiveProfiles("test")
 @EnableMongoRepositories(basePackageClasses = ArticleRepository.class)
-class ScholarlymailApplicationTests {
+class ScholarlyMailServiceTests {
 
 //	@Test
 //	void contextLoads() {
