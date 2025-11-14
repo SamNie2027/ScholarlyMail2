@@ -27,6 +27,9 @@ services:
       - scholarlymail
     environment:
       SPRING_DATA_MONGODB_URI: mongodb://${DB_ROOT_USERNAME}:${DB_ROOT_PASSWORD}@mongodb:27017/local?authSource=admin
+      SPRING_APPLICATION_NAME: scholarlymail
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "*"
+      MANAGEMENT_ENDPOINT_HEALTH_SHOW-DETAILS: always
     depends_on:
       mongodb:
         condition: service_healthy

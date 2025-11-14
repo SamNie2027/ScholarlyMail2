@@ -1,9 +1,9 @@
 package com.samnie.scholarlymail;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -12,7 +12,7 @@ import java.util.Optional;
 @Service
 public class ScholarlyMailService {
     private final ArticleRepository articleRepo;
-
+    Logger log = LoggerFactory.getLogger(ScholarlyMailService.class);
     public ScholarlyMailService(ArticleRepository articleRepo) {
         this.articleRepo = articleRepo;
     }
@@ -22,14 +22,18 @@ public class ScholarlyMailService {
     }
 
     public Optional<Article> getArticles(String id) {
+        log.info("Getting article with id: {}", id);
         return articleRepo.findById(id);
     }
 
     public Article postArticles(Article article) {
+        log.info("Posting article {}", article);
         return articleRepo.save(article);
     }
 
     public Optional<Article> patchArticles(String id, Map<String, Object> updates) {
+        log.info("Patching article {}", id);
+        log.info("Updating article with updates {}", updates);
         Optional<Article> existingArticleOpt = articleRepo.findById(id);
 
         if (existingArticleOpt.isEmpty()) {
@@ -62,6 +66,7 @@ public class ScholarlyMailService {
     }
 
     public boolean deleteArticles(String id) {
+        log.info("Deleting article {}", id);
         if (!articleRepo.existsById(id)) {
             return false;
         }
@@ -71,6 +76,7 @@ public class ScholarlyMailService {
     }
 
     public Optional<Article> updateArticles(String id) {
+        log.info("Updating article as read {}", id);
         Optional<Article> existingArticleOpt = articleRepo.findById(id);
         if (existingArticleOpt.isEmpty()) {
             return Optional.empty();
