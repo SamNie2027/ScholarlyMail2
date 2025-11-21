@@ -6,7 +6,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -21,7 +20,6 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 @Testcontainers
 @ActiveProfiles("test")
-@EnableMongoRepositories(basePackageClasses = ArticleRepository.class)
 class ScholarlyMailServiceTests {
 
 //	@Test

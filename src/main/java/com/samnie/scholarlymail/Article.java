@@ -1,21 +1,41 @@
 package com.samnie.scholarlymail;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.couchbase.core.mapping.Document;
+import org.springframework.data.couchbase.core.mapping.Field;
 
 import java.util.List;
 
-@Document("article")
+@Document
 public class Article {
+
     @Id
     private String id;
+
+    @Field
     private String title;
+
+    @Field
     private String url;
+
+    @Field
     private Boolean read = false;
+
+    @Field
     private String createdAt;
-    private List<String> tags; // optional
-    private String notes; // optional
-    private List<String> authors; // optional
+
+    @Field
+    private List<String> tags;
+
+    @Field
+    private String notes;
+
+    @Field
+    private List<String> authors;
+
+    // --- REQUIRED by Spring Data Couchbase ---
+    public Article() {
+    }
 
     public Article(String id, String title, String url, String createdAt) {
         this.id = id;
@@ -76,12 +96,12 @@ public class Article {
         this.createdAt = createdAt;
     }
 
-    public void setNotes(String notes) {
-        this.notes = notes;
-    }
-
     public void setTags(List<String> tags) {
         this.tags = tags;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 
     public void setAuthors(List<String> authors) {

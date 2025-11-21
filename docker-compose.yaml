@@ -1,46 +1,47 @@
 name: scholarlymail
 
 services:
-  mongodb:
-    image: mongo:4.4.18
+  couchbase:
+    image: couchbase:community
     ports:
-      - "27017:27017"
+      - "8091-8094:8091-8094"
+      - "11210:11210"
     networks:
       - scholarlymail
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${DB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     volumes:
-      - mongodb_data:/data/db
+      - db_data:/data/db
+    environment:
+      COUCHBASE_ADMINISTRATOR_USERNAME: ${DB_ROOT_USERNAME}
+      COUCHBASE_ADMINISTRATOR_PASSWORD: ${DB_ROOT_PASSWORD}
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongo "mongodb://localhost:27017/local" --quiet
-      interval: 30s
-      timeout: 10s
-      retries: 5
+      test: ["CMD", "curl", "-f", "http://localhost:8091/ui/index.html"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   web:
     build: .
-    ports:
-     - "8081:8081"
     image: scholarlymail
+    ports:
+      - "8081:8081"
     networks:
       - scholarlymail
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb://${DB_ROOT_USERNAME}:${DB_ROOT_PASSWORD}@mongodb:27017/local?authSource=admin
       SPRING_APPLICATION_NAME: scholarlymail
       MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "*"
-      MANAGEMENT_ENDPOINT_HEALTH_SHOW-DETAILS: always
-    depends_on:
-      mongodb:
-        condition: service_healthy
-        restart: true
+      MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: always
+      SPRING_COUCHBASE_CONNECTION_STRING: couchbase://couchbase
+      SPRING_COUCHBASE_USERNAME: ${DB_ROOT_USERNAME}
+      SPRING_COUCHBASE_PASSWORD: ${DB_ROOT_PASSWORD}
+      SPRING_DATA_COUCHBASE_BUCKET_NAME: articles
 
+    depends_on:
+      couchbase:
+        condition: service_healthy
 
 volumes:
-  mongodb_data:
+  db_data:
     driver: local
 
-
 networks:
-  # The presence of these objects is sufficient to define them
   scholarlymail: {}
