@@ -7,6 +7,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import org.springframework.data.couchbase.repository.config.EnableCouchbaseRepositories;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.couchbase.BucketDefinition;
 import org.testcontainers.couchbase.CouchbaseContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -18,22 +20,23 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
 @Testcontainers
-@ActiveProfiles("test")
-@EnableCouchbaseRepositories(basePackageClasses = ArticleRepository.class)
+@SpringBootTest
+@ActiveProfiles("Test")
 class ScholarlyMailRepositoryTests {
 
-    static DockerImageName couchbaseImage = DockerImageName
-            .parse("couchbase/server:community")
-            .asCompatibleSubstituteFor("couchbase/server");
+    static CouchbaseContainer couchbase = new CouchbaseContainer("couchbase/server:7.2.0")
+            .withBucket(new BucketDefinition("articles"));
 
     @Container
-    static final CouchbaseContainer couchbase =
-            new CouchbaseContainer(couchbaseImage)
-                    .withCredentials("admin", "password")
-                    .withBucket(new BucketDefinition("articles"));
+    static CouchbaseContainer container = couchbase;
 
+    @DynamicPropertySource
+    static void registerProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.couchbase.connection-string", container::getConnectionString);
+        registry.add("spring.couchbase.username", container::getUsername);
+        registry.add("spring.couchbase.password", container::getPassword);
+    }
 
     @BeforeAll
     static void setup() {

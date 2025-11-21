@@ -9,6 +9,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.couchbase.repository.config.EnableCouchbaseRepositories;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.couchbase.BucketDefinition;
 import org.testcontainers.couchbase.CouchbaseContainer;
@@ -27,19 +29,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Testcontainers
-@EnableCouchbaseRepositories(basePackageClasses = ArticleRepository.class)
 class ScholarlyMailIntegrationTests {
 
-    static DockerImageName couchbaseImage = DockerImageName
-            .parse("couchbase/server:community")
-            .asCompatibleSubstituteFor("couchbase/server");
+    static CouchbaseContainer couchbase = new CouchbaseContainer("couchbase/server:7.2.0")
+            .withBucket(new BucketDefinition("articles"));
 
     @Container
-    static final CouchbaseContainer couchbase =
-            new CouchbaseContainer(couchbaseImage)
-                    .withCredentials("admin", "password")
-                    .withBucket(new BucketDefinition("articles"));
+    static CouchbaseContainer container = couchbase;
 
+    @DynamicPropertySource
+    static void registerProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.couchbase.connection-string", container::getConnectionString);
+        registry.add("spring.couchbase.username", container::getUsername);
+        registry.add("spring.couchbase.password", container::getPassword);
+    }
 
     @BeforeAll
     static void setup() {
