@@ -2,42 +2,62 @@ name: scholarlymail
 
 services:
   couchbase:
-    image: couchbase:community
+    build: ./couchbase-server
     ports:
-      - "8091-8094:8091-8094"
-      - "11210:11210"
+      - 8091-8096:8091-8096
+      - 11210:11210
+    environment:
+      - CLUSTER_NAME=ScholarlyMail
+      - COUCHBASE_ADMINISTRATOR_USERNAME=${DB_ROOT_USERNAME}
+      - COUCHBASE_ADMINISTRATOR_PASSWORD=${DB_ROOT_PASSWORD}
+      - COUCHBASE_BUCKET=articles
+      - COUCHBASE_BUCKET_RAMSIZE=512
+      - COUCHBASE_RBAC_USERNAME=${DB_ROOT_USERNAME}
+      - COUCHBASE_RBAC_PASSWORD=${DB_ROOT_PASSWORD}
+      - COUCHBASE_RBAC_NAME=admin
+      - COUCHBASE_RAM_SIZE=2048
+      - COUCHBASE_INDEX_RAM_SIZE=512
+    hostname: couchbase-server
+    container_name: couchbase-server
+    working_dir: /opt/couchbase
+    stdin_open: true
+    tty: true
     networks:
       - scholarlymail
-    volumes:
-      - db_data:/data/db
-    environment:
-      COUCHBASE_ADMINISTRATOR_USERNAME: ${DB_ROOT_USERNAME}
-      COUCHBASE_ADMINISTRATOR_PASSWORD: ${DB_ROOT_PASSWORD}
+    command: sh -c "/opt/couchbase/init/init-cbserver.sh"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8091/ui/index.html"]
+      test: [ "CMD", "curl", "-fsS", "http://localhost:8091/pools" ]
       interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 20
+      start_period: 30s
+
 
   web:
     build: .
+    container_name: scholarlymail
     image: scholarlymail
     ports:
       - "8081:8081"
     networks:
       - scholarlymail
+    depends_on:
+      couchbase:
+        condition: service_healthy
     environment:
       SPRING_APPLICATION_NAME: scholarlymail
-      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "*"
-      MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: always
       SPRING_COUCHBASE_CONNECTION_STRING: couchbase://couchbase
       SPRING_COUCHBASE_USERNAME: ${DB_ROOT_USERNAME}
       SPRING_COUCHBASE_PASSWORD: ${DB_ROOT_PASSWORD}
       SPRING_DATA_COUCHBASE_BUCKET_NAME: articles
 
-    depends_on:
-      couchbase:
-        condition: service_healthy
+      SPRING_AUTOCONFIGURE_EXCLUDE: >
+        org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration,
+        org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration,
+        org.springframework.boot.autoconfigure.data.mongo.MongoRepositoriesAutoConfiguration
+
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "*"
+      MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: always
 
 volumes:
   db_data:
