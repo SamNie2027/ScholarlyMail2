@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent { docker { image 'maven:3.9.8-eclipse-temurin-17' } }
     options {
         skipStagesAfterUnstable()
     }
@@ -9,15 +9,15 @@ pipeline {
                 sh 'mvn -DskipTests clean package '
             }
         }
-        stage('Test'){
-            steps {
-
-            }
-        }
-        stage('Deploy') {
-            steps {
-
-            }
-        }
+//         stage('Test'){
+//             steps {
+//
+//             }
+//         }
+//         stage('Deploy') {
+//             steps {
+//
+//             }
+//         }
     }
 }
