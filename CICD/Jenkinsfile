@@ -2,14 +2,13 @@ pipeline {
     environment {
         DOCKER_HOST = "tcp://host.docker.internal:2375"
         DOCKER_TLS_VERIFY = ""
-        TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE = "tcp://host.docker.internal:2375"
         DOCKER_CERT_PATH = ""
     }
 
     agent {
       docker {
         image 'maven:3.9.8-eclipse-temurin-17'
-        args '-e DOCKER_HOST=tcp://host.docker.internal:2375 -e DOCKER_TLS_VERIFY='
+        args '-e DOCKER_HOST=tcp://host.docker.internal:2375 -e DOCKER_TLS_VERIFY= -e DOCKER_CERT_PATH='
       }
     }
 
