@@ -1,18 +1,20 @@
 pipeline {
+    environment {
+        DOCKER_HOST = "tcp://host.docker.internal:2375"
+        DOCKER_TLS_VERIFY = "0"
+    }
     agent {
         docker {
             image 'maven:3.9.8-eclipse-temurin-17'
+            // ensures DNS for host works
             args '--add-host=host.docker.internal:host-gateway'
         }
     }
-    environment {
-        DOCKER_HOST = 'tcp://host.docker.internal:2375'
-        DOCKER_TLS_VERIFY = '0'
-    }
     stages {
-        stage('Build') {
+        stage('Docker Check') {
             steps {
-                sh 'mvn -DskipTests clean package'
+                sh 'echo DOCKER_HOST=$DOCKER_HOST'
+                sh 'docker version'
             }
         }
         stage('Test') {
