@@ -1,32 +1,25 @@
 package com.samnie.scholarlymail;
 
+import com.samnie.scholarlymail.Article;
+import com.samnie.scholarlymail.ArticleRepository;
+import com.samnie.scholarlymail.ScholarlyMailService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
-import org.springframework.test.context.ActiveProfiles;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@Testcontainers
-@ActiveProfiles("test")
-@EnableMongoRepositories(basePackageClasses = ArticleRepository.class)
+@ExtendWith(MockitoExtension.class)
 class ScholarlyMailServiceTests {
-
-//	@Test
-//	void contextLoads() {
-//	}
 
     @Mock
     private ArticleRepository articleRepo;
@@ -38,10 +31,7 @@ class ScholarlyMailServiceTests {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-
         sampleArticle = new Article("1", "Sample", "https://example.com", "2025-01-01");
-        sampleArticle.setId("1");
         sampleArticle.setAuthors(List.of("Sam Nie"));
         sampleArticle.setTags(List.of("AI", "ML"));
         sampleArticle.setNotes("Interesting read");

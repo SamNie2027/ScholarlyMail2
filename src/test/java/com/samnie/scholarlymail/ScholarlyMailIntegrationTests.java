@@ -1,28 +1,25 @@
 package com.samnie.scholarlymail;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.samnie.scholarlymail.ArticleRepository;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.autoconfigure.wavefront.WavefrontProperties;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.data.couchbase.repository.config.EnableCouchbaseRepositories;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.couchbase.BucketDefinition;
+import org.testcontainers.couchbase.CouchbaseContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -32,15 +29,25 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Testcontainers
-@EnableMongoRepositories(basePackageClasses = ArticleRepository.class)
 class ScholarlyMailIntegrationTests {
 
+    static CouchbaseContainer couchbase = new CouchbaseContainer("couchbase/server:7.2.0")
+            .withBucket(new BucketDefinition("articles"));
+
     @Container
-    static MongoDBContainer mongoDBContainer = new MongoDBContainer("mongo:4.4.18");
+    static CouchbaseContainer container = couchbase;
+
+    @DynamicPropertySource
+    static void registerProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.couchbase.connection-string", container::getConnectionString);
+        registry.add("spring.couchbase.username", container::getUsername);
+        registry.add("spring.couchbase.password", container::getPassword);
+    }
 
     @BeforeAll
     static void setup() {
-        System.setProperty("spring.data.mongodb.uri", mongoDBContainer.getReplicaSetUrl());
+        couchbase.start();
+        // Testcontainers will automatically create the bucket defined in .withBucket()
     }
 
     @Autowired

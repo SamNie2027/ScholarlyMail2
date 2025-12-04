@@ -11,79 +11,77 @@ import java.util.Optional;
 
 @Service
 public class ScholarlyMailService {
+
     private final ArticleRepository articleRepo;
-    Logger log = LoggerFactory.getLogger(ScholarlyMailService.class);
+    private static final Logger log = LoggerFactory.getLogger(ScholarlyMailService.class);
+
     public ScholarlyMailService(ArticleRepository articleRepo) {
         this.articleRepo = articleRepo;
     }
 
+    // ------- GET all ---------
     public List<Article> getAllArticles() {
+        log.info("Fetching all Couchbase articles");
         return articleRepo.findAll();
     }
 
+    // ------- GET one ---------
     public Optional<Article> getArticles(String id) {
-        log.info("Getting article with id: {}", id);
+        log.info("Fetching Couchbase article with id: {}", id);
         return articleRepo.findById(id);
     }
 
+    // ------- CREATE ---------
     public Article postArticles(Article article) {
-        log.info("Posting article {}", article);
+        log.info("Saving new Couchbase article: {}", article);
         return articleRepo.save(article);
     }
 
+    // ------- PATCH (partial update) ---------
     public Optional<Article> patchArticles(String id, Map<String, Object> updates) {
-        log.info("Patching article {}", id);
-        log.info("Updating article with updates {}", updates);
-        Optional<Article> existingArticleOpt = articleRepo.findById(id);
+        log.info("Patching Couchbase article {} with updates {}", id, updates);
 
-        if (existingArticleOpt.isEmpty()) {
+        Optional<Article> existingOpt = articleRepo.findById(id);
+        if (existingOpt.isEmpty()) {
             return Optional.empty();
         }
 
-        Article existingArticle = existingArticleOpt.get();
+        Article article = existingOpt.get();
 
-        // Apply partial updates (you can customize this logic)
-        if (updates.containsKey("title")) {
-            existingArticle.setTitle((String) updates.get("title"));
-        }
-        if (updates.containsKey("authors")) {
-            existingArticle.setAuthors((List<String>) updates.get("authors"));
-        }
-        if (updates.containsKey("url")) {
-            existingArticle.setUrl(updates.get("url").toString());
-        }
-        if (updates.containsKey("tags")) {
-            existingArticle.setTags((List<String>) updates.get("tags"));
-        }
-        if (updates.containsKey("notes")) {
-            existingArticle.setNotes(updates.get("notes").toString());
-        }
-        if (updates.containsKey("read")) {
-            existingArticle.setRead((boolean) updates.get("read"));
-        }
+        if (updates.containsKey("title")) article.setTitle((String) updates.get("title"));
+        if (updates.containsKey("authors")) article.setAuthors((List<String>) updates.get("authors"));
+        if (updates.containsKey("url")) article.setUrl(updates.get("url").toString());
+        if (updates.containsKey("tags")) article.setTags((List<String>) updates.get("tags"));
+        if (updates.containsKey("notes")) article.setNotes((String) updates.get("notes"));
+        if (updates.containsKey("read")) article.setRead((Boolean) updates.get("read"));
 
-        return Optional.of(articleRepo.save(existingArticle));
+        return Optional.of(articleRepo.save(article));
     }
 
+    // ------- DELETE ---------
     public boolean deleteArticles(String id) {
-        log.info("Deleting article {}", id);
+        log.info("Deleting Couchbase article {}", id);
+
         if (!articleRepo.existsById(id)) {
             return false;
         }
 
         articleRepo.deleteById(id);
-        return true; // 204 No Content
+        return true;
     }
 
+    // ------- UPDATE toggle read ---------
     public Optional<Article> updateArticles(String id) {
-        log.info("Updating article as read {}", id);
-        Optional<Article> existingArticleOpt = articleRepo.findById(id);
-        if (existingArticleOpt.isEmpty()) {
+        log.info("Toggling read status for Couchbase article {}", id);
+
+        Optional<Article> existingOpt = articleRepo.findById(id);
+        if (existingOpt.isEmpty()) {
             return Optional.empty();
-        } else {
-            Article existingArticle = existingArticleOpt.get();
-            existingArticleOpt.get().setRead(!existingArticleOpt.get().getRead());
-            return Optional.of(articleRepo.save(existingArticle));
         }
+
+        Article article = existingOpt.get();
+        article.setRead(!article.getRead());
+
+        return Optional.of(articleRepo.save(article));
     }
 }
