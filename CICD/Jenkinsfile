@@ -1,23 +1,17 @@
 pipeline {
+    environment {
+        DOCKER_HOST=tcp://docker:2376
+        DOCKER_TLS_VERIFY=1
+        DOCKER_CERT_PATH=/certs/client
+    }
+
     agent {
         docker {
             image 'maven:3.9.8-eclipse-temurin-17'
-            args '''
-                -e DOCKER_HOST=tcp://host.docker.internal:2375
-                -u root
-            '''
         }
     }
 
-
     stages {
-        stage('Verify Docker API') {
-            steps {
-                sh 'echo DOCKER_HOST=$DOCKER_HOST'
-                sh 'curl http://host.docker.internal:2375/version'
-            }
-        }
-
         stage('Build') {
             steps {
                 sh 'mvn -DskipTests clean package'
