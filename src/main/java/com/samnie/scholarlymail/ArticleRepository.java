@@ -1,8 +1,7 @@
 package com.samnie.scholarlymail;
 
-import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.couchbase.repository.CouchbaseRepository;
 
 @Repository
-public interface ArticleRepository extends MongoRepository<Article,String>{
-}
+public interface ArticleRepository extends CouchbaseRepository<Article, String> {}

@@ -1,46 +1,67 @@
 name: scholarlymail
 
 services:
-  mongodb:
-    image: mongo:4.4.18
+  couchbase:
+    build: ./couchbase-server
     ports:
-      - "27017:27017"
+      - 8091-8096:8091-8096
+      - 11210:11210
+    environment:
+      - CLUSTER_NAME=ScholarlyMail
+      - COUCHBASE_ADMINISTRATOR_USERNAME=${DB_ROOT_USERNAME}
+      - COUCHBASE_ADMINISTRATOR_PASSWORD=${DB_ROOT_PASSWORD}
+      - COUCHBASE_BUCKET=articles
+      - COUCHBASE_BUCKET_RAMSIZE=512
+      - COUCHBASE_RBAC_USERNAME=${DB_ROOT_USERNAME}
+      - COUCHBASE_RBAC_PASSWORD=${DB_ROOT_PASSWORD}
+      - COUCHBASE_RBAC_NAME=admin
+      - COUCHBASE_RAM_SIZE=2048
+      - COUCHBASE_INDEX_RAM_SIZE=512
+    hostname: couchbase-server
+    container_name: couchbase-server
+    working_dir: /opt/couchbase
+    stdin_open: true
+    tty: true
     networks:
       - scholarlymail
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${DB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-    volumes:
-      - mongodb_data:/data/db
+    command: sh -c "/opt/couchbase/init/init-cbserver.sh"
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongo "mongodb://localhost:27017/local" --quiet
-      interval: 30s
-      timeout: 10s
-      retries: 5
+      test: [ "CMD", "curl", "-fsS", "http://localhost:8091/pools" ]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 90s
+
 
   web:
     build: .
-    ports:
-     - "8081:8081"
+    container_name: scholarlymail
     image: scholarlymail
+    ports:
+      - "8081:8081"
     networks:
       - scholarlymail
-    environment:
-      SPRING_DATA_MONGODB_URI: mongodb://${DB_ROOT_USERNAME}:${DB_ROOT_PASSWORD}@mongodb:27017/local?authSource=admin
-      SPRING_APPLICATION_NAME: scholarlymail
-      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "*"
-      MANAGEMENT_ENDPOINT_HEALTH_SHOW-DETAILS: always
     depends_on:
-      mongodb:
+      couchbase:
         condition: service_healthy
-        restart: true
+    environment:
+      SPRING_APPLICATION_NAME: scholarlymail
+      SPRING_COUCHBASE_CONNECTION_STRING: couchbase://couchbase
+      SPRING_COUCHBASE_USERNAME: ${DB_ROOT_USERNAME}
+      SPRING_COUCHBASE_PASSWORD: ${DB_ROOT_PASSWORD}
+      SPRING_DATA_COUCHBASE_BUCKET_NAME: articles
 
+      SPRING_AUTOCONFIGURE_EXCLUDE: >
+        org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration,
+        org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration,
+        org.springframework.boot.autoconfigure.data.mongo.MongoRepositoriesAutoConfiguration
+
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "*"
+      MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: always
 
 volumes:
-  mongodb_data:
+  db_data:
     driver: local
 
-
 networks:
-  # The presence of these objects is sufficient to define them
   scholarlymail: {}
