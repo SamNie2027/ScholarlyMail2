@@ -1,49 +1,56 @@
 pipeline {
-    agent {
-        docker {
-            image 'maven:3.9.8-eclipse-temurin-17'
-            args """
-              --network jenkins \
-              -v /certs/client:/certs/client:ro \
-              -e DOCKER_HOST=tcp://docker:2376 \
-              -e DOCKER_TLS_VERIFY=1 \
-              -e DOCKER_CERT_PATH=/certs/client
-            """
-        }
-    }
+    agent any
 
     environment {
+        // Docker-in-Docker environment
         DOCKER_HOST = 'tcp://docker:2376'
         DOCKER_TLS_VERIFY = '1'
         DOCKER_CERT_PATH = '/certs/client'
     }
 
     stages {
-        stage('Debug Docker') {
-            steps {
-                echo "=== Environment Variables ==="
-                sh 'env | grep DOCKER'
-
-                echo "=== Check Mounted Certificates ==="
-                sh 'ls -l /certs/client'
-
-                echo "=== Test Docker Connection ==="
-                sh 'docker info'
-            }
-        }
-
         stage('Build') {
+            agent {
+                docker {
+                    image 'maven:3.9.8-eclipse-temurin-17'
+                    args """
+                        --network jenkins
+                        -v jenkins-docker-certs:/certs/client:ro
+                        -e DOCKER_HOST=${DOCKER_HOST}
+                        -e DOCKER_TLS_VERIFY=${DOCKER_TLS_VERIFY}
+                        -e DOCKER_CERT_PATH=${DOCKER_CERT_PATH}
+                    """
+                }
+            }
             steps {
-                echo "=== Maven Build ==="
+                echo 'Building Maven project...'
                 sh 'mvn -DskipTests clean package'
             }
         }
 
         stage('Test') {
+            agent {
+                docker {
+                    image 'maven:3.9.8-eclipse-temurin-17'
+                    args """
+                        --network jenkins
+                        -v jenkins-docker-certs:/certs/client:ro
+                        -e DOCKER_HOST=${DOCKER_HOST}
+                        -e DOCKER_TLS_VERIFY=${DOCKER_TLS_VERIFY}
+                        -e DOCKER_CERT_PATH=${DOCKER_CERT_PATH}
+                    """
+                }
+            }
             steps {
-                echo "=== Maven Tests ==="
+                echo 'Running tests...'
                 sh 'mvn test'
             }
+        }
+    }
+
+    post {
+        always {
+            echo 'Cleaning up...'
         }
     }
 }
