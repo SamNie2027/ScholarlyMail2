@@ -1,0 +1,39 @@
+services:
+  jenkins-docker:
+    image: docker:dind
+    container_name: jenkins-docker
+    privileged: true
+    networks:
+      - jenkins
+    environment:
+      DOCKER_TLS_CERTDIR: ""  # <-- disable TLS
+    volumes:
+      - jenkins-docker-certs:/certs/client
+    ports:
+      - "2375:2375"  # <-- expose unencrypted port
+
+  jenkins:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jenkins-blueocean
+    networks:
+      - jenkins
+    environment:
+      DOCKER_HOST: tcp://jenkins-docker:2375  # <-- note port
+      DOCKER_TLS_VERIFY: 0                     # disable TLS
+    volumes:
+      - jenkins-data:/var/jenkins_home
+    depends_on:
+      - jenkins-docker
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+
+
+networks:
+  jenkins:
+
+volumes:
+  jenkins-data:
+  jenkins-docker-certs:
