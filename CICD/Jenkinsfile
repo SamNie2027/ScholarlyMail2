@@ -1,32 +1,47 @@
 pipeline {
-    environment {
-        DOCKER_HOST='tcp://docker:2376'
-        DOCKER_TLS_VERIFY=1
-        DOCKER_CERT_PATH='/certs/client'
-    }
-
     agent {
         docker {
             image 'maven:3.9.8-eclipse-temurin-17'
             args """
-              --network jenkins
-              -e DOCKER_HOST=tcp://docker:2376
-              -e DOCKER_TLS_VERIFY=1
+              --network jenkins \
+              -v /certs/client:/certs/client:ro \
+              -e DOCKER_HOST=tcp://docker:2376 \
+              -e DOCKER_TLS_VERIFY=1 \
               -e DOCKER_CERT_PATH=/certs/client
-              -v jenkins-docker-certs:/certs/client:ro
             """
         }
     }
 
+    environment {
+        DOCKER_HOST = 'tcp://docker:2376'
+        DOCKER_TLS_VERIFY = '1'
+        DOCKER_CERT_PATH = '/certs/client'
+    }
+
     stages {
+        stage('Debug Docker') {
+            steps {
+                echo "=== Environment Variables ==="
+                sh 'env | grep DOCKER'
+
+                echo "=== Check Mounted Certificates ==="
+                sh 'ls -l /certs/client'
+
+                echo "=== Test Docker Connection ==="
+                sh 'docker info'
+            }
+        }
+
         stage('Build') {
             steps {
+                echo "=== Maven Build ==="
                 sh 'mvn -DskipTests clean package'
             }
         }
 
         stage('Test') {
             steps {
+                echo "=== Maven Tests ==="
                 sh 'mvn test'
             }
         }
