@@ -1,27 +1,16 @@
 pipeline {
-    agent any
-
-    environment {
-        // Docker-in-Docker environment
-        DOCKER_HOST = 'tcp://docker:2376'
-        DOCKER_TLS_VERIFY = '1'
-        DOCKER_CERT_PATH = '/certs/client'
+    agent {
+        docker {
+           image 'maven-with-docker'
+           // Mount host Docker socket and set Docker env vars so the
+           // container can use the host's Docker daemon without TLS certs.
+           // Adjust paths as needed for your Jenkins host.
+           args "-v /var/run/docker.sock:/var/run/docker.sock -e DOCKER_HOST=unix:///var/run/docker.sock -e DOCKER_TLS_VERIFY=0 -e DOCKER_CERT_PATH="
+        }
     }
 
     stages {
         stage('Build') {
-            agent {
-                docker {
-                    image 'maven:3.9.8-eclipse-temurin-17'
-                    args """
-                        --network jenkins
-                        -v jenkins-docker-certs:/certs/client:ro
-                        -e DOCKER_HOST=${DOCKER_HOST}
-                        -e DOCKER_TLS_VERIFY=${DOCKER_TLS_VERIFY}
-                        -e DOCKER_CERT_PATH=${DOCKER_CERT_PATH}
-                    """
-                }
-            }
             steps {
                 echo 'Building Maven project...'
                 sh 'mvn -DskipTests clean package'
@@ -29,28 +18,10 @@ pipeline {
         }
 
         stage('Test') {
-            agent {
-                docker {
-                    image 'maven:3.9.8-eclipse-temurin-17'
-                    args """
-                        --network jenkins
-                        -v jenkins-docker-certs:/certs/client:ro
-                        -e DOCKER_HOST=${DOCKER_HOST}
-                        -e DOCKER_TLS_VERIFY=${DOCKER_TLS_VERIFY}
-                        -e DOCKER_CERT_PATH=${DOCKER_CERT_PATH}
-                    """
-                }
-            }
             steps {
                 echo 'Running tests...'
                 sh 'mvn test'
             }
-        }
-    }
-
-    post {
-        always {
-            echo 'Cleaning up...'
         }
     }
 }
