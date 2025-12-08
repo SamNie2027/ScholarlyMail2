@@ -6,11 +6,12 @@ services:
     networks:
       - jenkins
     environment:
-      DOCKER_TLS_CERTDIR: ""  # <-- disable TLS
+      DOCKER_TLS_CERTDIR: /certs
     volumes:
       - jenkins-docker-certs:/certs/client
+      - ./certs:/certs
     ports:
-      - "2375:2375"  # <-- expose unencrypted port
+      - "2375:2375"
 
   jenkins:
     build:
