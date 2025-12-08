@@ -29,6 +29,24 @@
 	<properties>
 		<java.version>17</java.version>
 	</properties>
+
+	<!-- CI profile: centralize flags used by CI to skip container-backed tests -->
+	<profiles>
+		<profile>
+			<id>ci</id>
+			<activation>
+				<property>
+					<name>env.CI</name>
+				</property>
+			</activation>
+			<properties>
+				<!-- Exclude JUnit 5 tests tagged with 'container' -->
+				<junit.jupiter.tags.exclude>container</junit.jupiter.tags.exclude>
+				<!-- Provide a property Testcontainers can use if desired -->
+				<testcontainers.skip>true</testcontainers.skip>
+			</properties>
+		</profile>
+	</profiles>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

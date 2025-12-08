@@ -23,8 +23,9 @@ pipeline {
                 sh 'echo DOCKER_HOST=$DOCKER_HOST'
                 sh 'echo DOCKER_CONFIG=$DOCKER_CONFIG || echo DOCKER_CONFIG not set'
                 sh 'docker version'
-                // Exclude tests tagged with 'container' so Jenkins won't run Testcontainers tests
-                sh 'mvn test -Djunit.jupiter.tags.exclude=container -Dtestcontainers.skip=true'
+                // Use the CI profile which centralizes test-exclusion properties
+                // The 'ci' profile sets junit.jupiter.tags.exclude=container and testcontainers.skip=true
+                sh 'mvn -Pci test'
             }
         }
     }
