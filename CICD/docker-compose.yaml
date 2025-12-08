@@ -6,7 +6,7 @@ services:
     networks:
       - jenkins
     ports:
-      - "2376:2376"
+      - "2375:2375"
 
   jenkins:
     build:
