@@ -25,9 +25,9 @@ pipeline {
                 sh 'echo ~/.docker'
                 sh 'ls -la ~/.docker 2>/dev/null || echo no .docker dir'
                 sh 'ls -la /certs'
-                sh 'cp /certs/client/ca.pem ~/.docker/ca.pem || true'
-                sh 'cp /certs/client/cert.pem ~/.docker/cert.pem || true'
-                sh 'cp /certs/client/key.pem ~/.docker/key.pem || true'
+                sh 'cp /certs/ca.pem ~/.docker/ca.pem || true'
+                sh 'cp /certs/cert.pem ~/.docker/cert.pem || true'
+                sh 'cp /certs/key.pem ~/.docker/key.pem || true'
                 sh 'docker version'
                 sh 'mvn test -Dtestcontainers.debug=true'
             }
