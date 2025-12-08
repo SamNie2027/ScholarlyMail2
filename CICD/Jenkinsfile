@@ -24,6 +24,7 @@ pipeline {
                 sh 'echo DOCKER_CONFIG=$DOCKER_CONFIG || echo DOCKER_CONFIG not set'
                 sh 'echo ~/.docker'
                 sh 'ls -la ~/.docker 2>/dev/null || echo no .docker dir'
+                sh 'ls -la /certs/client'
                 sh 'cp /certs/client/ca.pem ~/.docker/ca.pem || true'
                 sh 'docker version'
                 sh 'mvn test -Dtestcontainers.debug=true'
