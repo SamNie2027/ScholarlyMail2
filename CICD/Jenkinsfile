@@ -28,5 +28,11 @@ pipeline {
                 sh 'mvn -Pci test'
             }
         }
+
+        stage('Build Container') {
+            sh 'docker compose build --no-cache'
+        }
     }
 }
+$env:CI = 'true'
+.\mvnw.cmd test
