@@ -36,5 +36,3 @@ pipeline {
         }
     }
 }
-$env:CI = 'true'
-.\mvnw.cmd test
