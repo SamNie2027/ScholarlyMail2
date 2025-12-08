@@ -1,0 +1,3 @@
+[ x509_exts ]
+extendedKeyUsage = serverAuth
+subjectAltName = DNS:7352b86d32ce,DNS:docker,DNS:localhost,IP:127.0.0.1,IP:172.21.0.2,IP:::1
