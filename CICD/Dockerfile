@@ -20,7 +20,7 @@ RUN apt-get update && apt-get install -y docker-ce-cli
 # Allow matching host docker group GID so the Jenkins user can access
 # a bind-mounted /var/run/docker.sock. Pass the host GID at build time
 # as `--build-arg DOCKER_GID=<gid>`. Default is 999.
-ARG DOCKER_GID=999
+ARG DOCKER_GID=1001
 # Create docker group with the given GID (ignore errors) and add jenkins
 # user to that group so it can access the socket at runtime.
 RUN groupadd -g ${DOCKER_GID} docker || true \
