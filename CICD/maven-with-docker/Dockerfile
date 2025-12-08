@@ -29,7 +29,7 @@ RUN groupadd -g ${JENKINS_GID} jenkins || true \
     && groupadd -g ${DOCKER_GID} docker || true \
     && usermod -aG docker jenkins || true \
     && mkdir -p /home/jenkins/.docker \
-    && echo '{}' > /home/jenkins/.docker/config.json \
+    && echo '{"tls": false, "tlsverify": false}' > /home/jenkins/.docker/config.json \
     && chown -R jenkins:jenkins /home/jenkins/.docker
 
 USER jenkins
