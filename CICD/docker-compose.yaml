@@ -5,11 +5,6 @@ services:
     privileged: true
     networks:
       - jenkins
-    environment:
-      DOCKER_TLS_CERTDIR: "/certs"  # enable TLS
-    volumes:
-      - jenkins-docker-certs:/certs/client
-      - ./certs:/certs
     ports:
       - "2376:2376"
 

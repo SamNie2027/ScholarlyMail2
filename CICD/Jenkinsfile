@@ -5,7 +5,7 @@ pipeline {
            // Mount host Docker socket and set Docker env vars so the
            // container can use the host's Docker daemon without TLS certs.
            // Adjust paths as needed for your Jenkins host.
-           args "--user 0:1001 -v jenkins-docker-certs:/certs -e HOME=/root -e DOCKER_HOST=tcp://host.docker.internal:2376 -e DOCKER_TLS_CERTDIR=/certs -e DOCKER_TLS_VERIFY=0"
+           args "--user 0:1001 -e HOME=/root -e DOCKER_HOST=tcp://host.docker.internal:2376"
         }
     }
 
@@ -22,12 +22,6 @@ pipeline {
                 sh 'echo HOME=$HOME'
                 sh 'echo DOCKER_HOST=$DOCKER_HOST'
                 sh 'echo DOCKER_CONFIG=$DOCKER_CONFIG || echo DOCKER_CONFIG not set'
-                sh 'echo ~/.docker'
-                sh 'ls -la ~/.docker 2>/dev/null || echo no .docker dir'
-                sh 'ls -la /certs'
-                sh 'cp /certs/ca.pem ~/.docker/ca.pem || true'
-                sh 'cp /certs/cert.pem ~/.docker/cert.pem || true'
-                sh 'cp /certs/key.pem ~/.docker/key.pem || true'
                 sh 'docker version'
                 sh 'mvn test -Dtestcontainers.debug=true'
             }
