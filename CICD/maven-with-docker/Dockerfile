@@ -19,14 +19,17 @@ RUN apt-get update && \
 ## a bind-mounted /var/run/docker.sock. Pass host GID with --build-arg
 ## DOCKER_GID=<gid>. Default is 999.
 ARG DOCKER_GID=1001
-ARG JENKINS_UID=1000
-ARG JENKINS_GID=1000
+ARG JENKINS_UID=1002
+ARG JENKINS_GID=1002
 
 # Create a `jenkins` user (so the container can run non-root) and ensure
 # it is a member of the docker group with the host-supplied GID.
 RUN groupadd -g ${JENKINS_GID} jenkins || true \
     && useradd -u ${JENKINS_UID} -g ${JENKINS_GID} -m -s /bin/bash jenkins || true \
     && groupadd -g ${DOCKER_GID} docker || true \
-    && usermod -aG docker jenkins || true
+    && usermod -aG docker jenkins || true \
+    && mkdir -p /home/jenkins/.docker \
+    && echo '{}' > /home/jenkins/.docker/config.json \
+    && chown -R jenkins:jenkins /home/jenkins/.docker
 
 USER jenkins
