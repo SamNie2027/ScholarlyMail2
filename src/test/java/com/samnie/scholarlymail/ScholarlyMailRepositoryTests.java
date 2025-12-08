@@ -1,48 +1,18 @@
 package com.samnie.scholarlymail;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-
-import org.springframework.data.couchbase.repository.config.EnableCouchbaseRepositories;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.couchbase.BucketDefinition;
-import org.testcontainers.couchbase.CouchbaseContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Testcontainers
 @SpringBootTest
 @ActiveProfiles("Test")
 class ScholarlyMailRepositoryTests {
-
-    static CouchbaseContainer couchbase = new CouchbaseContainer("couchbase/server:7.2.0")
-            .withBucket(new BucketDefinition("articles"));
-
-    @Container
-    static CouchbaseContainer container = couchbase;
-
-    @DynamicPropertySource
-    static void registerProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.couchbase.connection-string", container::getConnectionString);
-        registry.add("spring.couchbase.username", container::getUsername);
-        registry.add("spring.couchbase.password", container::getPassword);
-    }
-
-    @BeforeAll
-    static void setup() {
-        couchbase.start();
-        // Testcontainers will automatically create the bucket defined in .withBucket()
-    }
 
     @Autowired
     ArticleRepository articleRepository;
