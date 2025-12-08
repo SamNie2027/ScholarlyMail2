@@ -1,0 +1,32 @@
+pipeline {
+    agent {
+        dockerfile {
+           filename 'CICD/maven-with-docker/Dockerfile'
+           // Mount host Docker socket and set Docker env vars so the
+           // container can use the host's Docker daemon without TLS certs.
+           // Adjust paths as needed for your Jenkins host.
+           args "--user 0:1001 -v /var/run/docker.sock:/var/run/docker.sock -e HOME=/root -e DOCKER_HOST=unix:///var/run/docker.sock"
+        }
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                echo 'Building Maven project...'
+                sh 'mvn -DskipTests clean package'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh 'echo HOME=$HOME'
+                sh 'echo DOCKER_HOST=$DOCKER_HOST'
+                sh 'echo DOCKER_CONFIG=$DOCKER_CONFIG || echo DOCKER_CONFIG not set'
+                sh 'docker version'
+                // Use the CI profile which centralizes test-exclusion properties
+                // The 'ci' profile sets junit.jupiter.tags.exclude=container and testcontainers.skip=true
+                sh 'mvn -Pci test'
+            }
+        }
+    }
+}

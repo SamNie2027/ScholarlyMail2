@@ -3,41 +3,38 @@ package com.samnie.scholarlymail;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(ScholarlyMailController.class)
-@ExtendWith(MockitoExtension.class)
-class ScholarlyMailControllerTests {
+@SpringBootTest(classes = ScholarlyMailApplication.class)
+@AutoConfigureMockMvc
+class ScholarlyMailIntegrationTestsLocal {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
-    private ScholarlyMailService service;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @MockBean
     private ArticleRepository articleRepository;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
     private Article sampleArticle;
+    private Map<String, Article> store;
 
     @BeforeEach
     void setUp() {
@@ -46,9 +43,32 @@ class ScholarlyMailControllerTests {
         sampleArticle.setTags(List.of("AI", "ML"));
         sampleArticle.setNotes("Good read");
         sampleArticle.setRead(false);
+
+        store = new HashMap<>();
+
+        // mock save
+        when(articleRepository.save(any(Article.class))).thenAnswer(invocation -> {
+            Article a = invocation.getArgument(0);
+            store.put(a.getId(), a);
+            return a;
+        });
+
+        // mock findById
+        when(articleRepository.findById(anyString())).thenAnswer(invocation -> {
+            String id = invocation.getArgument(0);
+            return Optional.ofNullable(store.get(id));
+        });
+
+        // mock findAll
+        when(articleRepository.findAll()).thenAnswer(invocation -> new ArrayList<>(store.values()));
+
+        // mock existsById
+        when(articleRepository.existsById(anyString())).thenAnswer(invocation -> store.containsKey(invocation.getArgument(0)));
+
+        // Note: deleteById is a void method; controller logic queries existsById so removal is covered
     }
 
-    // ✅ Home endpoint
+    // Home endpoint
     @Test
     void testHomeEndpoint() throws Exception {
         mockMvc.perform(get("/"))
@@ -56,10 +76,10 @@ class ScholarlyMailControllerTests {
                 .andExpect(content().string("ScholarlyMail API is running!"));
     }
 
-    // ✅ GET /articles
     @Test
     void testGetAllArticles() throws Exception {
-        Mockito.when(service.getAllArticles()).thenReturn(List.of(sampleArticle));
+        // seed
+        articleRepository.save(sampleArticle);
 
         mockMvc.perform(get("/articles"))
                 .andExpect(status().isOk())
@@ -67,10 +87,9 @@ class ScholarlyMailControllerTests {
                 .andExpect(jsonPath("$[0].url").value("https://example.com"));
     }
 
-    // ✅ GET /articles/{id} - found
     @Test
     void testGetArticleFound() throws Exception {
-        Mockito.when(service.getArticles("1")).thenReturn(Optional.of(sampleArticle));
+        articleRepository.save(sampleArticle);
 
         mockMvc.perform(get("/articles/1"))
                 .andExpect(status().isOk())
@@ -78,20 +97,14 @@ class ScholarlyMailControllerTests {
                 .andExpect(jsonPath("$.title").value("Sample Article"));
     }
 
-    // ✅ GET /articles/{id} - not found
     @Test
     void testGetArticleNotFound() throws Exception {
-        Mockito.when(service.getArticles("404")).thenReturn(Optional.empty());
-
-        mockMvc.perform(get("/articles/404"))
+        mockMvc.perform(get("/articles/1231"))
                 .andExpect(status().isNotFound());
     }
 
-    // ✅ POST /articles
     @Test
     void testPostArticles() throws Exception {
-        Mockito.when(service.postArticles(any(Article.class))).thenReturn(sampleArticle);
-
         mockMvc.perform(post("/articles")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(sampleArticle)))
@@ -100,14 +113,10 @@ class ScholarlyMailControllerTests {
                 .andExpect(jsonPath("$.url").value("https://example.com"));
     }
 
-    // ✅ PATCH /articles/{id} - success
     @Test
     void testPatchArticlesSuccess() throws Exception {
+        articleRepository.save(sampleArticle);
         Map<String, Object> updates = Map.of("title", "Updated Title", "read", true);
-        Article updatedArticle = new Article("1", "Updated Title", "https://example.com", "2025-01-01");
-        updatedArticle.setRead(true);
-
-        Mockito.when(service.patchArticles(eq("1"), any(Map.class))).thenReturn(Optional.of(updatedArticle));
 
         mockMvc.perform(patch("/articles/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -117,52 +126,41 @@ class ScholarlyMailControllerTests {
                 .andExpect(jsonPath("$.read").value(true));
     }
 
-    // ✅ PATCH /articles/{id} - not found
     @Test
     void testPatchArticlesNotFound() throws Exception {
-        Mockito.when(service.patchArticles(eq("404"), any(Map.class))).thenReturn(Optional.empty());
-
-        mockMvc.perform(patch("/articles/404")
+        mockMvc.perform(patch("/articles/12341234`")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("title", "Nope"))))
                 .andExpect(status().isNotFound());
     }
 
-    // ✅ DELETE /articles/{id} - success
     @Test
     void testDeleteArticlesFound() throws Exception {
-        Mockito.when(service.deleteArticles("1")).thenReturn(true);
+        articleRepository.save(sampleArticle);
 
         mockMvc.perform(delete("/articles/1"))
                 .andExpect(status().isNoContent());
     }
 
-    // ✅ DELETE /articles/{id} - not found
     @Test
     void testDeleteArticlesNotFound() throws Exception {
-        Mockito.when(service.deleteArticles("404")).thenReturn(false);
-
         mockMvc.perform(delete("/articles/404"))
                 .andExpect(status().isNotFound());
     }
 
-    // ✅ PATCH /articles/{id}/read - success
     @Test
     void testUpdateArticlesReadSuccess() throws Exception {
-        sampleArticle.setRead(true);
-        Mockito.when(service.updateArticles("1")).thenReturn(Optional.of(sampleArticle));
+        articleRepository.save(sampleArticle);
 
         mockMvc.perform(patch("/articles/1/read"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.read").value(true));
     }
 
-    // ✅ PATCH /articles/{id}/read - not found
     @Test
     void testUpdateArticlesReadNotFound() throws Exception {
-        Mockito.when(service.updateArticles("404")).thenReturn(Optional.empty());
-
-        mockMvc.perform(patch("/articles/404/read"))
+        mockMvc.perform(patch("/articles/1/read"))
                 .andExpect(status().isNotFound());
     }
+
 }

@@ -1,0 +1,63 @@
+services:
+  jenkins-docker:
+    image: docker:dind
+    container_name: jenkins-docker
+    privileged: true
+    networks:
+      - jenkins
+    command: ["dockerd", "-H", "unix:///var/run/docker.sock", "-H", "tcp://0.0.0.0:2375"]
+    ports:
+      - "2375:2375"
+
+  jenkins:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Pass host docker group GID into the image build so the `docker`
+        # group inside the image matches the host GID and the `jenkins`
+        # user can access a bind-mounted /var/run/docker.sock.
+        # Set the env var DOCKER_GID before running `docker compose build`.
+        DOCKER_GID: ${DOCKER_GID:-999}
+    container_name: jenkins-blueocean
+    networks:
+      - jenkins
+    environment:
+      # Prefer using the host Docker unix socket to avoid TLS/certs issues
+      DOCKER_HOST: unix:///var/run/docker.sock
+    volumes:
+      - jenkins-data:/var/jenkins_home
+      # Mount the host Docker socket so the Jenkins controller can launch
+      # agent containers and run Docker CLI commands directly against the
+      # host daemon (works with Docker Desktop WSL2 backend).
+      - /var/run/docker.sock:/var/run/docker.sock
+      
+    depends_on:
+      - jenkins-docker
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+
+  # One-shot helper service to fix the host Docker socket ownership/perm
+  # when running under environments like Docker Desktop + WSL2. It runs as
+  # root, binds the host socket and sets group ownership to GID 1001 (the
+  # default used in the image build). Adjust the GID if you used a
+  # different value for DOCKER_GID.
+  socket-fix:
+    image: alpine:3.18
+    container_name: jenkins-socket-fix
+    command: ["sh","-c","chown root:1001 /var/run/docker.sock || true; chmod 660 /var/run/docker.sock || true"]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: "no"
+    depends_on:
+      - jenkins-docker
+
+
+networks:
+  jenkins:
+
+volumes:
+  jenkins-data:
+  jenkins-docker-certs:
+  

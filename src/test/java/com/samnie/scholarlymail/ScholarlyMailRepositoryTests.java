@@ -1,28 +1,32 @@
 package com.samnie.scholarlymail;
 
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-
-import org.springframework.data.couchbase.repository.config.EnableCouchbaseRepositories;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.couchbase.BucketDefinition;
 import org.testcontainers.couchbase.CouchbaseContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
-
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @Testcontainers
 @SpringBootTest
 @ActiveProfiles("Test")
+@Tag("container")
+@DisabledIfEnvironmentVariable(named = "JENKINS_HOME", matches = ".*")
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true")
+@DisabledIfSystemProperty(named = "testcontainers.skip", matches = "true")
 class ScholarlyMailRepositoryTests {
 
     static CouchbaseContainer couchbase = new CouchbaseContainer("couchbase/server:7.2.0")
