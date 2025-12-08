@@ -2,8 +2,10 @@ pipeline {
     agent {
         docker {
            image 'maven-with-docker'
-           // Use the DinD container via host port for Docker access in the agent
-           args "-e DOCKER_HOST=tcp://host.docker.internal:2375 -e DOCKER_TLS=0 -e DOCKER_TLS_VERIFY=0 -e DOCKER_CERT_PATH="
+           // Mount host Docker socket and set Docker env vars so the
+           // container can use the host's Docker daemon without TLS certs.
+           // Adjust paths as needed for your Jenkins host.
+           args "-v /var/run/docker.sock:/var/run/docker.sock -e DOCKER_HOST=unix:///var/run/docker.sock -e DOCKER_TLS=0 -e DOCKER_TLS_VERIFY=0 -e DOCKER_CERT_PATH= -e DOCKER_CONFIG=/tmp"
         }
     }
 
@@ -17,7 +19,6 @@ pipeline {
 
         stage('Test') {
             steps {
-                echo 'Running tests...'
                 sh 'docker version'
                 sh 'mvn test -Dtestcontainers.debug=true'
             }
