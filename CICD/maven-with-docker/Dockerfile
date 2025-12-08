@@ -27,6 +27,7 @@ ARG JENKINS_GID=1002
 RUN groupadd -g ${JENKINS_GID} jenkins || true \
     && useradd -u ${JENKINS_UID} -g ${JENKINS_GID} -m -s /bin/bash jenkins || true \
     && groupadd -g ${DOCKER_GID} docker || true \
-    && usermod -aG docker jenkins || true
+    && usermod -aG docker jenkins || true \
+    && openssl req -x509 -newkey rsa:4096 -keyout /tmp/key.pem -out /tmp/ca.pem -days 365 -nodes -subj "/C=US/ST=State/L=City/O=Org/CN=localhost"
 
 USER jenkins
