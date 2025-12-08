@@ -5,7 +5,7 @@ pipeline {
            // Mount host Docker socket and set Docker env vars so the
            // container can use the host's Docker daemon without TLS certs.
            // Adjust paths as needed for your Jenkins host.
-           args "--user 0:1001 -e HOME=/root -e DOCKER_HOST=unix:///var/run/docker.sock -e DOCKER_TLS=0 -e DOCKER_TLS_VERIFY=0"
+           args "--user 0:1001 -e HOME=/root -e DOCKER_HOST=tcp://jenkins-docker:2375 -e DOCKER_TLS=0 -e DOCKER_TLS_VERIFY=0"
         }
     }
 
