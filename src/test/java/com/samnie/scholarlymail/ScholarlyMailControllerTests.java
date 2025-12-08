@@ -31,6 +31,9 @@ class ScholarlyMailControllerTests {
     @MockBean
     private ScholarlyMailService service;
 
+    @MockBean
+    private ArticleRepository articleRepository;
+
     @Autowired
     private ObjectMapper objectMapper;
 

@@ -45,6 +45,23 @@
 				<!-- Provide a property Testcontainers can use if desired -->
 				<testcontainers.skip>true</testcontainers.skip>
 			</properties>
+
+			<!-- Ensure the CI profile passes the flags as system properties to tests -->
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>3.0.0-M9</version>
+						<configuration>
+							<systemPropertyVariables>
+								<testcontainers.skip>${testcontainers.skip}</testcontainers.skip>
+								<junit.jupiter.tags.exclude>${junit.jupiter.tags.exclude}</junit.jupiter.tags.exclude>
+							</systemPropertyVariables>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 	</profiles>
 	<dependencies>
