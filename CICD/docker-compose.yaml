@@ -6,7 +6,7 @@ services:
     networks:
       - jenkins
     environment:
-      DOCKER_TLS_CERTDIR: "/certs/client"  # enable TLS
+      DOCKER_TLS_CERTDIR: "/certs"  # enable TLS
     volumes:
       - jenkins-docker-certs:/certs/client
       - ./certs:/certs
