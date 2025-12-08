@@ -18,7 +18,8 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Running tests...'
-                sh 'mvn test'
+                sh 'docker version'
+                sh 'mvn test -Dtestcontainers.debug=true'
             }
         }
     }
