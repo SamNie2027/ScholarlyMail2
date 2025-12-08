@@ -6,7 +6,7 @@ services:
     networks:
       - jenkins
     environment:
-      DOCKER_TLS_CERTDIR: /certs
+      DOCKER_TLS_CERTDIR: /certs/client
     volumes:
       - jenkins-docker-certs:/certs/client
       - ./certs:/certs
