@@ -29,6 +29,7 @@ RUN groupadd -g ${JENKINS_GID} jenkins || true \
     && groupadd -g ${DOCKER_GID} docker || true \
     && usermod -aG docker jenkins || true \
     && mkdir -p /root/.docker \
-    && openssl req -x509 -newkey rsa:4096 -keyout /root/.docker/key.pem -out /root/.docker/ca.pem -days 365 -nodes -subj "/C=US/ST=State/L=City/O=Org/CN=localhost"
+    && openssl req -x509 -newkey rsa:4096 -keyout /root/.docker/key.pem -out /root/.docker/ca.pem -days 365 -nodes -subj "/C=US/ST=State/L=City/O=Org/CN=localhost" \
+    && echo '{}' > /root/.docker/config.json
 
 USER jenkins
