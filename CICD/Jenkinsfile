@@ -30,7 +30,9 @@ pipeline {
         }
 
         stage('Build Container') {
-            sh 'docker compose build --no-cache'
+            steps {
+                sh 'docker compose build --no-cache'
+            }
         }
     }
 }
