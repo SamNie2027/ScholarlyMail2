@@ -29,6 +29,7 @@ RUN groupadd -g ${JENKINS_GID} jenkins || true \
     && groupadd -g ${DOCKER_GID} docker || true \
     && usermod -aG docker jenkins || true \
     && mkdir -p /root/.docker \
-    && echo '{"tls": false}' > /root/.docker/config.json
+    && echo '{"tls": false}' > /root/.docker/config.json \
+    && touch /root/.docker/ca.pem
 
 USER jenkins
