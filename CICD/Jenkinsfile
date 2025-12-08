@@ -2,8 +2,8 @@ pipeline {
     agent {
         docker {
            image 'maven-with-docker'
-           // Use the DinD container for Docker access in the agent
-           args "-e DOCKER_HOST=tcp://jenkins-docker:2375 -e DOCKER_TLS_VERIFY=0 -e DOCKER_CERT_PATH="
+           // Use the DinD container via host port for Docker access in the agent
+           args "-e DOCKER_HOST=tcp://host.docker.internal:2375 -e DOCKER_TLS_VERIFY=0 -e DOCKER_CERT_PATH="
         }
     }
 
