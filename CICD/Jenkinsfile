@@ -25,7 +25,6 @@ pipeline {
                 sh 'echo ~/.docker'
                 sh 'ls -la ~/.docker 2>/dev/null || echo no .docker dir'
                 sh 'ls -la /certs'
-                sh 'ls -la /var/jenkins_home/workspace/ScholarlyMail@2/CICD/certs'
                 sh 'docker version'
                 sh 'mvn test -Dtestcontainers.debug=true'
             }
