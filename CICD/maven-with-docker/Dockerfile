@@ -28,8 +28,6 @@ RUN groupadd -g ${JENKINS_GID} jenkins || true \
     && useradd -u ${JENKINS_UID} -g ${JENKINS_GID} -m -s /bin/bash jenkins || true \
     && groupadd -g ${DOCKER_GID} docker || true \
     && usermod -aG docker jenkins || true \
-    && mkdir -p /root/.docker \
-    && echo '{"tls": false}' > /root/.docker/config.json \
-    && openssl req -x509 -newkey rsa:4096 -keyout /dev/null -out /root/.docker/ca.pem -days 1 -nodes -subj "/C=US/ST=State/L=City/O=Org/CN=localhost"
+    && mkdir -p /root/.docker
 
 USER jenkins
