@@ -1,7 +1,7 @@
 pipeline {
     agent {
         docker {
-           image 'maven-with-docker'
+           image 'maven-with-docker:v2'
            // Mount host Docker socket and set Docker env vars so the
            // container can use the host's Docker daemon without TLS certs.
            // Adjust paths as needed for your Jenkins host.
