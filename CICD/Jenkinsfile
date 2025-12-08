@@ -23,7 +23,8 @@ pipeline {
                 sh 'echo DOCKER_HOST=$DOCKER_HOST'
                 sh 'echo DOCKER_CONFIG=$DOCKER_CONFIG || echo DOCKER_CONFIG not set'
                 sh 'docker version'
-                sh 'mvn test -Dtestcontainers.skip=true'
+                // Exclude tests tagged with 'container' so Jenkins won't run Testcontainers tests
+                sh 'mvn test -Djunit.jupiter.tags.exclude=container -Dtestcontainers.skip=true'
             }
         }
     }

@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.junit.jupiter.api.Tag;
 import org.testcontainers.couchbase.BucketDefinition;
 import org.testcontainers.couchbase.CouchbaseContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -29,6 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = ScholarlyMailApplication.class)
 @AutoConfigureMockMvc
 @Testcontainers
+@Tag("container")
 class ScholarlyMailIntegrationTests {
 
     static CouchbaseContainer couchbase = new CouchbaseContainer("couchbase/server:7.2.0")

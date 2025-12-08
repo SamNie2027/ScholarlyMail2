@@ -14,6 +14,7 @@ import org.testcontainers.couchbase.CouchbaseContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
+import org.junit.jupiter.api.Tag;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Testcontainers
 @SpringBootTest
 @ActiveProfiles("Test")
+@Tag("container")
 class ScholarlyMailRepositoryTests {
 
     static CouchbaseContainer couchbase = new CouchbaseContainer("couchbase/server:7.2.0")
