@@ -19,6 +19,11 @@ pipeline {
 
         stage('Test') {
             steps {
+                sh 'echo HOME=$HOME'
+                sh 'echo DOCKER_HOST=$DOCKER_HOST'
+                sh 'echo DOCKER_CONFIG=$DOCKER_CONFIG || echo DOCKER_CONFIG not set'
+                sh 'echo ~/.docker'
+                sh 'ls -la ~/.docker 2>/dev/null || echo no .docker dir'
                 sh 'docker version'
                 sh 'mvn test -Dtestcontainers.debug=true'
             }
