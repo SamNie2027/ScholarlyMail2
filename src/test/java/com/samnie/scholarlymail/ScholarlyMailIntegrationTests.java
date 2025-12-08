@@ -2,7 +2,6 @@ package com.samnie.scholarlymail;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -20,7 +19,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(classes = ScholarlyMailApplication.class)
 @AutoConfigureMockMvc
-@Disabled("Requires local Couchbase instance - run manually with local DB")
 class ScholarlyMailIntegrationTests {
 
     @Autowired
