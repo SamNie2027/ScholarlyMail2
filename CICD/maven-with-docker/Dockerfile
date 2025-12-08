@@ -18,7 +18,7 @@ RUN apt-get update && \
 ## Allow matching host docker group GID so the container user can access
 ## a bind-mounted /var/run/docker.sock. Pass host GID with --build-arg
 ## DOCKER_GID=<gid>. Default is 999.
-ARG DOCKER_GID=999
+ARG DOCKER_GID=1001
 ARG JENKINS_UID=1000
 ARG JENKINS_GID=1000
 
