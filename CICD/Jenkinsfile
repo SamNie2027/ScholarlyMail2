@@ -34,5 +34,14 @@ pipeline {
                 sh 'docker compose build --no-cache'
             }
         }
+
+        stage('Archive') {
+            steps {
+                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true  
+                archiveArtifacts artifacts: 'target/site/**/*'
+                archiveArtifacts artifacts: 'logs/**'
+
+            }
+        }
     }
 }
